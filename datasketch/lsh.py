@@ -153,6 +153,15 @@ class MinHashLSH(object):
         for H, hashtable in zip(Hs, self.hashtables):
             hashtable.insert(H, key, buffer=buffer)
 
+    def merge(self, lsh): 
+        if self.hashranges != lsh.hashranges or self.h != lsh.h or self.b != lsh.b or self.r != lsh.r:
+            raise ValueError('Incompatible LSH instances')
+
+        self.keys.merge(lsh.keys)
+
+        for my_hashtable, their_hashtable in zip(self.hashtables, lsh.hashtables):
+            my_hashtable.merge(their_hashtable)
+
     def query(self, minhash):
         '''
         Giving the MinHash of the query set, retrieve 

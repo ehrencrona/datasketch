@@ -104,6 +104,10 @@ class Storage(ABC):
         '''Return an iterator on keys in storage'''
         return []
 
+    def merge(self, storage):
+        for key in storage.keys():
+            self.insert(key, storage.get(key))
+
     @abstractmethod
     def get(self, key):
         '''Get list of values associated with a key
@@ -212,6 +216,11 @@ class DictSetStorage(UnorderedStorage, DictListStorage):
     def insert(self, key, *vals, **kwargs):
         self._dict[key].update(vals)
 
+    def merge(self, storage):
+        if isinstance(storage, DictSetStorage):
+            self._dict.update(storage._dict)
+        else:
+            super.merge(storage)
 
 if redis is not None:
     class RedisBuffer(redis.client.Pipeline):

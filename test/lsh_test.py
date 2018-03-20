@@ -63,6 +63,31 @@ class TestMinHashLSH(unittest.TestCase):
         m3 = MinHash(18)
         self.assertRaises(ValueError, lsh.insert, "c", m3)
 
+    def test_merge(self):
+        lsh1 = MinHashLSH(threshold=0.5, num_perm=16)
+        lsh2 = MinHashLSH(threshold=0.5, num_perm=16)
+        m1 = MinHash(16)
+        m1.update("a".encode("utf8"))
+        m2 = MinHash(16)
+        m2.update("b".encode("utf8"))
+        lsh1.insert("a", m1)
+        lsh2.insert("b", m2)
+        lsh1.merge(lsh2)
+
+        for t in lsh1.hashtables:
+            self.assertTrue(len(t) >= 1)
+            items = []
+            for H in t:
+                items.extend(t[H])
+            self.assertTrue("a" in items)
+            self.assertTrue("b" in items)
+        self.assertTrue("a" in lsh1)
+        self.assertTrue("b" in lsh1)
+        for i, H in enumerate(lsh1.keys["a"]):
+            self.assertTrue("a" in lsh1.hashtables[i][H])
+
+        self.assertRaises(ValueError, lsh1.merge, MinHashLSH(threshold=0.4, num_perm=16))
+
     def test_query(self):
         lsh = MinHashLSH(threshold=0.5, num_perm=16)
         m1 = MinHash(16)
